@@ -1,10 +1,10 @@
 ---
-name: collabkit
+name: agentsync
 description: Multi-agent progress sync framework. Install a shared .progress/ directory and rule files so Claude Code, Codex, OpenCode, Kimi Code, OpenClaw, Grok Build, Antigravity, and Cursor can coordinate on the same project.
-triggers: collabkit, multi-agent, agent sync, init progress sync, sync agents
+triggers: agentsync, agent sync, multi-agent, init progress sync, sync agents, collabkit
 ---
 
-# CollabKit
+# AgentSync
 
 Lightweight multi-agent coordination through shared progress files.
 
@@ -207,7 +207,7 @@ Only write to your own directory. Do not delete old progress files.
 
 Only include "If you are X" blocks for agents the user actually uses. Remove the others. Each agent's "Read from" lines should list every other selected agent's directory except its own.
 
-If the user selected Grok Build but not other AGENTS.md consumers, also create `.grok/rules/collabkit.md` with the Grok Build block content (Grok scans this directory natively).
+If the user selected Grok Build but not other AGENTS.md consumers, also create `.grok/rules/agentsync.md` with the Grok Build block content (Grok scans this directory natively).
 
 ### Step 8: Generate GEMINI.md
 
@@ -281,7 +281,7 @@ GEMINI.md
 
 Summarize what was created:
 - Which directories under .progress/
-- Which rule files (CLAUDE.md, AGENTS.md, GEMINI.md, `.grok/rules/collabkit.md`) and where they were placed
+- Which rule files (CLAUDE.md, AGENTS.md, GEMINI.md, `.grok/rules/agentsync.md`) and where they were placed
 - Path mappings applied (e.g., `E:\` → `/mnt/e/` for WSL)
 - Git exclusion status
 - Any existing files that were preserved or appended to

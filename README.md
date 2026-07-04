@@ -1,15 +1,17 @@
-# CollabKit
+# AgentSync
+
+**中文** | [English](./README.en.md)
 
 轻量级多 Agent 进度同步框架，让 Claude Code、Codex、OpenCode、Kimi Code、OpenClaw、Grok Build、Antigravity、Cursor 等 AI 编码 Agent 在同一项目上协作时，能互相读到彼此的进度。
 
 ## 安装
 
 ```bash
-mkdir -p ~/.claude/skills/collabkit
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/collabkit/main/collabkit/SKILL.md -o ~/.claude/skills/collabkit/SKILL.md
+mkdir -p ~/.claude/skills/agentsync
+curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/SKILL.md -o ~/.claude/skills/agentsync/SKILL.md
 ```
 
-安装后在任意项目中输入 `/collabkit` 即可使用。
+安装后在任意项目中输入 `/agentsync` 即可使用。
 
 ## 功能
 
@@ -26,7 +28,7 @@ curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/collabkit/main/collabkit
 - **Progress**（自动）— 5 行微日志，Agent 在阶段完成时自动写入，用于日常同步。
 - **Handoff**（手动）— 详细会话报告，切换 Agent 时手动生成，包含完整上下文和决策链。
 
-通过共享的 `.progress/` 目录和 `CLAUDE.md` / `AGENTS.md` 规则文件，让每个 Agent 知道去哪读其他人的进度、往哪写自己的进度。
+通过共享的 `.progress/` 目录和项目规则文件（`CLAUDE.md`、`AGENTS.md`、`GEMINI.md`），让每个 Agent 知道去哪读其他人的进度、往哪写自己的进度。
 
 ## 支持的 Agent
 
@@ -40,51 +42,6 @@ curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/collabkit/main/collabkit
 | Grok Build | `AGENTS.md`、`.grok/rules/*.md` | ✅ 已验证 |
 | Antigravity | `GEMINI.md` | 🔧 未测试 |
 | Cursor | `AGENTS.md`（也可用 `.cursor/rules/*.mdc`） | ✅ 已验证 |
-
----
-
-# CollabKit (English)
-
-Lightweight multi-agent progress sync framework for Claude Code.
-
-Let Claude Code, Codex, OpenCode, Kimi Code, OpenClaw, Grok Build, Antigravity, and Cursor coordinate on the same project by reading each other's progress logs.
-
-## Install
-
-```bash
-mkdir -p ~/.claude/skills/collabkit
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/collabkit/main/collabkit/SKILL.md -o ~/.claude/skills/collabkit/SKILL.md
-```
-
-Then say `/collabkit` in any project.
-
-## Features
-
-The skill provides three commands:
-
-1. **Init** — Guided setup. Asks which agents you use, your environment, creates the right rule files and directories.
-2. **Handoff** — Reviews your session, runs `git diff`, writes a detailed handoff report.
-3. **Sync** — Scans all agents' latest progress and shows a summary table.
-
-## How It Works
-
-Two types of data:
-
-- **Progress** (automatic) — 5-line micro-logs agents write automatically when a phase completes. For daily sync.
-- **Handoff** (manual) — Detailed session reports you trigger manually before switching agents. For deep transitions.
-
-## Verified Agents
-
-| Agent | Auto-reads rules | Status |
-|-------|-----------------|--------|
-| Claude Code | `CLAUDE.md` | ✅ Verified |
-| Codex | `AGENTS.md` | ✅ Verified |
-| OpenCode | `AGENTS.md` | ✅ Mostly works |
-| Kimi Code | `AGENTS.md` | ✅ Verified |
-| OpenClaw | `AGENTS.md` | 🔧 Untested |
-| Grok Build | `AGENTS.md`, `.grok/rules/*.md` | ✅ Verified |
-| Antigravity | `GEMINI.md` | 🔧 Untested |
-| Cursor | `AGENTS.md` (also `.cursor/rules/*.mdc`) | ✅ Verified |
 
 ## License
 
