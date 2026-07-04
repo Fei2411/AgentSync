@@ -1,6 +1,6 @@
 ---
 name: collabkit
-description: Multi-agent progress sync framework. Install a shared .progress/ directory and rule files so Claude Code, Codex, OpenCode, Kimi Code, and OpenClaw can coordinate on the same project.
+description: Multi-agent progress sync framework. Install a shared .progress/ directory and rule files so Claude Code, Codex, OpenCode, Kimi Code, OpenClaw, Grok Build, Antigravity, and Cursor can coordinate on the same project.
 triggers: collabkit, multi-agent, agent sync, init progress sync, sync agents
 ---
 
@@ -29,6 +29,24 @@ Ask the user to choose:
 
 Guide the user through setup with a conversational flow. Ask one question at a time, wait for answers, then generate the correct files based on their environment.
 
+### Agent Rule File Reference
+
+| Agent | Auto-reads | Progress directory | Status |
+|-------|-----------|-------------------|--------|
+| Claude Code | `CLAUDE.md` | `.progress/claude/` | ✅ Verified |
+| Codex | `AGENTS.md` | `.progress/codex/` | ✅ Verified |
+| OpenCode | `AGENTS.md` | `.progress/opencode/` | ✅ Mostly works |
+| Kimi Code | `AGENTS.md` | `.progress/kimi/` | ✅ Verified |
+| OpenClaw | `AGENTS.md` | `.progress/openclaw/` | 🔧 Untested |
+| Grok Build | `AGENTS.md`, `.grok/rules/*.md` | `.progress/grok/` | ✅ Verified |
+| Antigravity | `GEMINI.md` | `.progress/antigravity/` | 🔧 Untested |
+| Cursor | `AGENTS.md` (also `.cursor/rules/*.mdc`) | `.progress/cursor/` | ✅ Verified |
+
+Official sources:
+- Grok Build: reads `AGENTS.md` and `.grok/rules/*.md` (Grok Build user guide: Project Rules)
+- Antigravity: reads `GEMINI.md` by default ([Gemini CLI context files](https://geminicli.com/docs/cli/gemini-md/)); Antigravity CLI is the successor to Gemini CLI
+- Cursor: reads root and nested `AGENTS.md` ([Cursor rules docs](https://cursor.com/docs/context/rules)); `.cursor/rules/*.mdc` is an optional alternative
+
 ### Step 1: Which agents do you use?
 
 Ask the user to select all that apply:
@@ -38,6 +56,9 @@ Ask the user to select all that apply:
 - OpenCode
 - Kimi Code
 - OpenClaw
+- Grok Build
+- Antigravity
+- Cursor
 - Other (ask for the name)
 
 ### Step 2: Project location
@@ -69,6 +90,8 @@ Example scenario:
 Ask:
 - Does the project already have a CLAUDE.md? (yes/no)
 - Does the project already have an AGENTS.md? (yes/no)
+- Does the project already have a GEMINI.md? (yes/no, only if Antigravity is selected)
+- Does the project already have `.grok/rules/` files? (yes/no, only if Grok Build is selected)
 
 If yes, ask whether to overwrite or append.
 
@@ -142,7 +165,7 @@ Adjust the "Read from" lines based on which agents the user selected. Only inclu
 
 ### Step 7: Generate AGENTS.md
 
-If the user uses agents other than Claude Code, create an AGENTS.md with "If you are X" blocks for each selected agent.
+If the user uses Codex, OpenCode, Kimi Code, OpenClaw, Grok Build, or Cursor, create an AGENTS.md with "If you are X" blocks for each selected agent. Antigravity uses `GEMINI.md` (Step 8), not AGENTS.md.
 
 ```
 # Multi-Agent Progress Sync
@@ -161,6 +184,14 @@ If you are Kimi Code:
 - Read the latest 2 `.md` reports from `.progress/codex/` and `.progress/claude/` and `.progress/opencode/`.
 - Write progress only to `.progress/kimi/YYYY-MM-DD-HHmm.md`.
 
+If you are Grok Build:
+- Read the latest 2 `.md` reports from `.progress/codex/` and `.progress/claude/` and `.progress/cursor/`.
+- Write progress only to `.progress/grok/YYYY-MM-DD-HHmm.md`.
+
+If you are Cursor:
+- Read the latest 2 `.md` reports from `.progress/codex/` and `.progress/claude/` and `.progress/grok/`.
+- Write progress only to `.progress/cursor/YYYY-MM-DD-HHmm.md`.
+
 Write progress only when a phase is completed, work is paused, or handoff is needed.
 
 Keep each progress report to at most 5 lines:
@@ -174,24 +205,83 @@ Keep each progress report to at most 5 lines:
 Only write to your own directory. Do not delete old progress files.
 ```
 
-Only include "If you are X" blocks for agents the user actually uses. Remove the others.
+Only include "If you are X" blocks for agents the user actually uses. Remove the others. Each agent's "Read from" lines should list every other selected agent's directory except its own.
 
-### Step 8: Git exclusion
+If the user selected Grok Build but not other AGENTS.md consumers, also create `.grok/rules/collabkit.md` with the Grok Build block content (Grok scans this directory natively).
 
-Ask: Do you want to exclude AGENTS.md and .progress/ from git?
+### Step 8: Generate GEMINI.md
+
+If the user uses Antigravity, create a `GEMINI.md` with paths adjusted to the environment from Step 3. Antigravity CLI (Google's `agy`, successor to Gemini CLI) loads `GEMINI.md` from the project root and ancestor directories by default.
+
+**Example: Antigravity on Windows native, project at `E:\webnovel.agent`**
+
+```
+# Multi-Agent Progress Sync
+
+I am Antigravity.
+
+Use the shared progress directory inside the project:
+
+- Read the latest 2 `.md` reports from `E:\webnovel.agent\.progress\codex\`.
+- Read the latest 2 `.md` reports from `E:\webnovel.agent\.progress\claude\`.
+- Read the latest 2 `.md` reports from `E:\webnovel.agent\.progress\cursor\`.
+- When a phase is completed, work is paused, or handoff is needed, write progress to `E:\webnovel.agent\.progress\antigravity\YYYY-MM-DD-HHmm.md`.
+
+Keep each progress report to at most 5 lines:
+
+- time:
+- task:
+- status:
+- changed:
+- note:
+
+Only write to `.progress/antigravity/`. Do not delete old progress files.
+```
+
+**Example: Antigravity on macOS/Linux, project at `/home/user/project`**
+
+```
+# Multi-Agent Progress Sync
+
+I am Antigravity.
+
+Use the shared progress directory inside the project:
+
+- Read the latest 2 `.md` reports from `.progress/codex/`.
+- Read the latest 2 `.md` reports from `.progress/claude/`.
+- Read the latest 2 `.md` reports from `.progress/cursor/`.
+- When a phase is completed, work is paused, or handoff is needed, write progress to `.progress/antigravity/YYYY-MM-DD-HHmm.md`.
+
+Keep each progress report to at most 5 lines:
+
+- time:
+- task:
+- status:
+- changed:
+- note:
+
+Only write to `.progress/antigravity/`. Do not delete old progress files.
+```
+
+Adjust the "Read from" lines based on which agents the user selected. Only include directories for agents that exist.
+
+### Step 9: Git exclusion
+
+Ask: Do you want to exclude AGENTS.md, GEMINI.md, and .progress/ from git?
 
 If yes, update `.git/info/exclude` (not .gitignore, to avoid polluting the project):
 
 ```
 AGENTS.md
+GEMINI.md
 .progress/
 ```
 
-### Step 9: Confirm
+### Step 10: Confirm
 
 Summarize what was created:
 - Which directories under .progress/
-- Which rule files (CLAUDE.md, AGENTS.md) and where they were placed
+- Which rule files (CLAUDE.md, AGENTS.md, GEMINI.md, `.grok/rules/collabkit.md`) and where they were placed
 - Path mappings applied (e.g., `E:\` → `/mnt/e/` for WSL)
 - Git exclusion status
 - Any existing files that were preserved or appended to
@@ -237,6 +327,9 @@ Anything the next agent needs to know before picking up work.
    - OpenCode → `opencode_session_20260610_1435.md`
    - Kimi Code → `kimi_session_20260610_1435.md`
    - OpenClaw → `openclaw_session_20260610_1435.md`
+   - Grok Build → `grok_session_20260610_1435.md`
+   - Antigravity → `antigravity_session_20260610_1435.md`
+   - Cursor → `cursor_session_20260610_1435.md`
 
 ---
 

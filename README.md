@@ -1,6 +1,6 @@
 # CollabKit
 
-轻量级多 Agent 进度同步框架，让 Claude Code、Codex、OpenCode、Kimi Code、OpenClaw 等 AI 编码 Agent 在同一项目上协作时，能互相读到彼此的进度。
+轻量级多 Agent 进度同步框架，让 Claude Code、Codex、OpenCode、Kimi Code、OpenClaw、Grok Build、Antigravity、Cursor 等 AI 编码 Agent 在同一项目上协作时，能互相读到彼此的进度。
 
 ## 安装
 
@@ -37,6 +37,9 @@ curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/collabkit/main/collabkit
 | OpenCode | `AGENTS.md` | ✅ 基本可用 |
 | Kimi Code | `AGENTS.md` | ✅ 已验证 |
 | OpenClaw | `AGENTS.md` | 🔧 未测试 |
+| Grok Build | `AGENTS.md`、`.grok/rules/*.md` | ✅ 已验证 |
+| Antigravity | `GEMINI.md` | 🔧 未测试 |
+| Cursor | `AGENTS.md`（也可用 `.cursor/rules/*.mdc`） | ✅ 已验证 |
 
 ---
 
@@ -44,7 +47,7 @@ curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/collabkit/main/collabkit
 
 Lightweight multi-agent progress sync framework for Claude Code.
 
-Let Claude Code, Codex, OpenCode, Kimi Code, and OpenClaw coordinate on the same project by reading each other's progress logs.
+Let Claude Code, Codex, OpenCode, Kimi Code, OpenClaw, Grok Build, Antigravity, and Cursor coordinate on the same project by reading each other's progress logs.
 
 ## Install
 
@@ -79,6 +82,9 @@ Two types of data:
 | OpenCode | `AGENTS.md` | ✅ Mostly works |
 | Kimi Code | `AGENTS.md` | ✅ Verified |
 | OpenClaw | `AGENTS.md` | 🔧 Untested |
+| Grok Build | `AGENTS.md`, `.grok/rules/*.md` | ✅ Verified |
+| Antigravity | `GEMINI.md` | 🔧 Untested |
+| Cursor | `AGENTS.md` (also `.cursor/rules/*.mdc`) | ✅ Verified |
 
 ## License
 
