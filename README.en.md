@@ -6,29 +6,61 @@ Lightweight multi-agent progress sync framework. Lets Claude Code, Codex, OpenCo
 
 ## Install
 
+One command installs to every detected agent host (Claude Code, Grok Build, Cursor, etc.):
+
+**macOS / Linux / WSL:**
 ```bash
-mkdir -p ~/.claude/skills/agentsync
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/SKILL.md -o ~/.claude/skills/agentsync/SKILL.md
+curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+```
+
+**Windows PowerShell:**
+```powershell
+irm https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.ps1 | iex
+```
+
+Install to specific agents only:
+```bash
+curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash -s -- --agents grok,claude
 ```
 
 Then invoke `/agentsync` in any project.
 
+## Update
+
+The update command is the same as install — it overwrites the local `SKILL.md` with the latest release:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+```
+
+Or inside your agent:
+```
+/agentsync update
+```
+
+Check installed vs latest version:
+```bash
+curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash -s -- --check
+```
+
 ## Features
 
-Three commands:
+Invoke `/agentsync` to get three choice boxes:
 
-1. **Init** — Guided setup. Select your agents and runtime environment; AgentSync generates the right rule files and directory structure.
-2. **Handoff** — Session handoff. Reviews the current session, runs `git diff`, and writes a detailed report (context, decisions, changes, next steps).
-3. **Sync** — Progress sync. Scans every agent's latest progress log, prints a summary table, and flags potential file conflicts.
+1. **Init** — First-time setup. Select agents and runtime environment; generates rule files and directory structure.
+2. **Handoff** — Session handoff. Reviews the current session, runs `git diff`, and saves a complete handoff report.
+3. **Sync** — Full handover sync. Reads handoff reports and progress logs using a tiered strategy (large projects do not load every progress file).
+
+Typical flow: first run → **Init** → long session needs migration → **Handoff** → new agent or return after a break → **Sync**.
 
 ## How It Works
 
 Two types of data:
 
-- **Progress** (automatic) — 5-line micro-logs written when a phase completes. For daily sync.
-- **Handoff** (manual) — Detailed session reports triggered before switching agents. For deep transitions.
+- **Progress** (automatic) — 5-line micro-logs written when a phase completes. For daily sync. Not user-triggered.
+- **Handoff** (manual) — Complete session reports for urgent migration when the project is large or the conversation is long. Not auto-loaded, to keep context cost low.
 
-A shared `.progress/` directory plus project rule files (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`) tell each agent where to read others' progress and where to write its own.
+**How Sync reads progress at scale**: latest 2 entries per agent in full, up to 20 older entries as a compact table, everything beyond that as counts only. Also reads the latest handoff per agent in full. Rule files (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`) still handle daily auto-read (latest 2 only).
 
 ## Supported Agents
 

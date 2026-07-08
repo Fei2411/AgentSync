@@ -1,7 +1,10 @@
 ---
 name: agentsync
-description: Multi-agent progress sync framework. Install a shared .progress/ directory and rule files so Claude Code, Codex, OpenCode, Kimi Code, OpenClaw, Grok Build, Antigravity, and Cursor can coordinate on the same project.
-triggers: agentsync, agent sync, multi-agent, init progress sync, sync agents, collabkit
+description: Multi-agent progress sync framework. Install a shared .progress/ directory and rule files so Claude Code, Codex, OpenCode, Kimi Code, OpenClaw, Grok Build, Antigravity, and Cursor can coordinate on the same project. Use when updating the skill with /agentsync update or "update agentsync".
+triggers: agentsync, agent sync, multi-agent, init progress sync, sync agents, collabkit, update agentsync, agentsync update
+allowed-tools: AskUserQuestion, Read, Write, Glob, Grep, Shell
+metadata:
+  version: "1.1.0"
 ---
 
 # AgentSync
@@ -10,24 +13,95 @@ Lightweight multi-agent coordination through shared progress files.
 
 There are two types of data in this system:
 
-- **Progress** (automatic) — 5-line micro-logs agents write when a phase completes. Lightweight, routine, for daily sync.
-- **Handoff** (manual) — Detailed session reports generated on demand. Rich context, decisions, causality, for deep agent transitions.
+- **Progress** (automatic) — 5-line micro-logs agents write when a phase completes. Lightweight, routine, for daily sync. Agents read these automatically via rule files; the user does not trigger this.
+- **Handoff** (manual) — Detailed session reports generated on demand. Rich context, decisions, causality. For urgent agent migration when the project is large or the conversation is long. Not for daily use.
 
-When the user invokes this skill, present three options and execute the chosen one.
+## Interaction Rules
+
+**Language** — Before any prompt, detect the user's language from conversation context. Use **Chinese** when any of these is true:
+- The user's latest message is in Chinese
+- The project `README.md` is primarily Chinese (e.g. bilingual repo with Chinese first)
+- The workspace path contains CJK characters
+
+Otherwise use English. **Never default to English** when context is Chinese.
+
+**Choice UI** — Every user decision MUST use the choice-box tool, not plain chat:
+- Grok Build / Claude Code → `AskUserQuestion`
+- Cursor → `AskQuestion`
+
+**Forbidden:** listing numbered options in chat and waiting for a typed reply. **Required:** call the choice-box tool first, then act on the answer.
+
+When the user invokes this skill, **immediately** show the option menu via the choice-box tool. Do not skip the menu or guess the option.
 
 ## Option Menu
 
-Ask the user to choose:
+Call `AskUserQuestion` (or `AskQuestion` in Cursor) with exactly these three options. Localize `question`, `header`, `label`, and `description` to the detected language.
 
-1. **Init** - Set up the collaboration framework for this project
-2. **Handoff** - Generate a detailed session handoff report (not the same as progress — this is a full session review with context, decisions, and next steps)
-3. **Sync** - Scan and display all agents' latest progress
+**English example:**
+
+```
+AskUserQuestion({
+  questions: [{
+    header: "Action",
+    question: "What do you want to do?",
+    multiSelect: false,
+    options: [
+      { label: "Init", description: "First-time setup — create .progress/ and agent rule files" },
+      { label: "Handoff", description: "Generate a full session handoff report" },
+      { label: "Sync", description: "Read handoffs + progress and present full sync" }
+    ]
+  }]
+})
+```
+
+**Chinese example:**
+
+```
+AskUserQuestion({
+  questions: [{
+    header: "操作",
+    question: "你想做什么？",
+    multiSelect: false,
+    options: [
+      { label: "Init 初始化", description: "首次安装 — 创建 .progress/ 目录和 Agent 规则文件" },
+      { label: "Handoff 交接", description: "生成本次会话的完整交接报告" },
+      { label: "Sync 同步", description: "读取 handoff + progress，呈现完整同步视图" }
+    ]
+  }]
+})
+```
+
+Typical flow:
+- First run → **Init**
+- Long session, switching agents → **Handoff**
+- New agent or returning after a break → **Sync**
+
+### Update shortcut
+
+If the user says **update agentsync**, **更新 agentsync**, or passes `update` as an argument (`/agentsync update`), skip the menu and run the updater script for the current agent host:
+
+**macOS / Linux / WSL:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+```
+
+**Windows PowerShell:**
+```powershell
+irm https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.ps1 | iex
+```
+
+To update only specific agents, append flags:
+```bash
+curl -fsSL .../install.sh | bash -s -- --agents grok,claude
+```
+
+After the script finishes, read the local `SKILL.md` version from `metadata.version` and confirm the update to the user in their language.
 
 ---
 
 ## Init
 
-Guide the user through setup with a conversational flow. Ask one question at a time, wait for answers, then generate the correct files based on their environment.
+Guide the user through setup with **choice-box prompts only** — one `AskUserQuestion` call per step. Do not ask setup questions in plain chat. After each answer, call the next `AskUserQuestion` until all steps are done, then generate files.
 
 ### Agent Rule File Reference
 
@@ -49,7 +123,7 @@ Official sources:
 
 ### Step 1: Which agents do you use?
 
-Ask the user to select all that apply:
+`AskUserQuestion` with `multiSelect: true`. Options (localize labels):
 
 - Claude Code
 - Codex
@@ -59,41 +133,39 @@ Ask the user to select all that apply:
 - Grok Build
 - Antigravity
 - Cursor
-- Other (ask for the name)
+
+If the user picks "Other", follow up with one more `AskUserQuestion` or accept free text only for the custom agent name.
 
 ### Step 2: Project location
 
-Ask: Where is your project located?
+`AskUserQuestion` with `multiSelect: false`:
 
-Example answer: `E:\webnovel.agent` or `/home/user/project`
+- **Current workspace** — use the workspace path from session context (preferred default)
+- **Other** — user provides a custom path via the tool's Other field
 
-Store this as the `project_path`.
+Store the result as `project_path`.
 
 ### Step 3: Environment for each agent
 
-For each agent the user selected, ask: What environment does [agent] run in?
+First `AskUserQuestion`: "Do all selected agents share the same runtime environment?" (Yes / No).
 
-Options:
-- **Windows native** — uses Windows paths like `E:\...`
-- **WSL** — uses `/mnt/e/...` style paths
-- **macOS / Linux native** — uses Unix paths like `/home/...`
-- **Docker / remote** — ask for the path mapping
+- **Yes** → one environment `AskUserQuestion` for all agents
+- **No** → one environment `AskUserQuestion` per selected agent
 
-This determines the path format each agent's rule file will use.
+Environment options (localize):
 
-Example scenario:
-- Claude Code → WSL (needs `/mnt/e/webnovel.agent`)
-- Codex → Windows native (needs `E:\webnovel.agent`)
+- **Windows native** — paths like `E:\...`
+- **WSL** — paths like `/mnt/e/...`
+- **macOS / Linux native** — paths like `/home/...`
+- **Docker / remote** — user provides path mapping via Other
+
+Example: Claude Code → WSL (`/mnt/e/webnovel.agent`); Codex → Windows native (`E:\webnovel.agent`).
 
 ### Step 4: Existing files?
 
-Ask:
-- Does the project already have a CLAUDE.md? (yes/no)
-- Does the project already have an AGENTS.md? (yes/no)
-- Does the project already have a GEMINI.md? (yes/no, only if Antigravity is selected)
-- Does the project already have `.grok/rules/` files? (yes/no, only if Grok Build is selected)
+Check which rule files already exist, then `AskUserQuestion` per file that exists (skip missing ones). Only ask about `GEMINI.md` if Antigravity is selected; only ask about `.grok/rules/` if Grok Build is selected.
 
-If yes, ask whether to overwrite or append.
+Options per file: **Overwrite** / **Append** / **Skip**
 
 ### Step 5: Create directories
 
@@ -267,7 +339,7 @@ Adjust the "Read from" lines based on which agents the user selected. Only inclu
 
 ### Step 9: Git exclusion
 
-Ask: Do you want to exclude AGENTS.md, GEMINI.md, and .progress/ from git?
+`AskUserQuestion`: exclude `AGENTS.md`, `GEMINI.md`, and `.progress/` from git? Options: **Yes** / **No** (localize).
 
 If yes, update `.git/info/exclude` (not .gitignore, to avoid polluting the project):
 
@@ -335,23 +407,90 @@ Anything the next agent needs to know before picking up work.
 
 ## Sync
 
-When the user chooses this option:
+When the user chooses this option, perform a **full sync** for agent handover. Sync reads both data types:
 
-1. Scan all `.progress/` subdirectories (excluding handoffs/).
-2. Read the latest file in each directory.
-3. Present a summary table:
+- **Handoffs** — complete session reports (`.progress/handoffs/`)
+- **Progress** — 5-line micro-logs (`.progress/{agent}/`)
+
+A large project may accumulate many progress files. Do **not** read them all verbatim. Use the tiered strategy below to stay useful without blowing the context budget.
+
+### Sync reading limits
+
+| Tier | Source | What to read | Default cap |
+|------|--------|--------------|-------------|
+| **Full** | Handoffs | Latest report per agent | 1 per agent, full content |
+| **Full** | Progress | Most recent entries | 2 per agent, full 5 lines each |
+| **Compact** | Progress | Older entries | Up to 20 per agent, metadata table only |
+| **Omit** | Progress | Everything older | Count only — do not load content |
+
+Global cap: stop adding compact rows after **80 total** across all agents. Note what was omitted.
+
+Sort all files by timestamp (parse `YYYY-MM-DD-HHmm` from filename; fall back to file mtime).
+
+### Sync procedure
+
+1. **Discover** — List every `.progress/{agent}/` subdirectory (exclude `handoffs/`). If `.progress/` is missing, tell the user to run **Init** first.
+
+2. **Handoffs (full tier)** — In `.progress/handoffs/`:
+   - Group files by agent prefix (`claude`, `codex`, `grok`, …).
+   - Read the **latest** report per agent in full.
+   - Older handoffs → compact index table only (filename + date + first heading).
+   - If no handoffs exist, say so — progress alone may still be enough for short gaps.
+
+3. **Progress (full tier)** — For each agent directory:
+   - Read the **latest 2** `.md` files in full (same depth agents use in rule files).
+   - Present under `## Progress — Recent`.
+
+4. **Progress (compact tier)** — For older files (3rd newest and beyond):
+   - Parse only the 5 fields: `time`, `task`, `status`, `changed`, `note`.
+   - Present as a table — do not repeat full note text if longer than one line; truncate.
 
 ```
-| Agent | Last Active | Task | Status |
-|-------|------------|------|--------|
-| Claude | 2026-06-07 23:57 | Douyin analytics scan | done |
-| Codex | 2026-06-06 00:30 | Deploy Worker | done |
+| Agent | Time | Task | Status | Changed |
+|-------|------|------|--------|---------|
+| Codex | 2026-07-01 09:00 | auth refactor | done | src/auth.ts |
 ```
 
-4. If two agents' latest reports mention the same file, flag a warning:
+5. **Progress (omit tier)** — If an agent has more entries than the compact cap:
 
 ```
-Potential conflict: Claude and Codex both modified src/auth.ts
+Codex: 47 older entries omitted — see .progress/codex/
 ```
 
-5. If any agent has no reports yet, show "No reports" for that agent.
+6. **Alerts** — Scan full + compact tiers for:
+   - `status: blocked` → flag prominently
+   - `status: in_progress` on multiple agents touching the same path in `changed:` → potential conflict
+   - No progress from an agent in 7+ days → stale
+   - Handoff exists but is older than the latest progress from that agent → note that progress may be more current
+
+7. **Present** — Output in this order:
+
+```
+# AgentSync — Full Sync
+
+## Summary
+(one paragraph: who did what recently, active/blocked items, whether handoffs exist)
+
+## Alerts
+(only if any)
+
+## Handoffs
+(full content — latest per agent)
+
+## Progress — Recent
+(full 5-line entries — latest 2 per agent)
+
+## Progress — History
+(compact table — older entries)
+
+## Omitted
+(counts only, if any)
+```
+
+8. **Optional deep dive** — If one agent has heavy history and the user cares, ask whether to expand that agent's compact window (e.g. 10 more rows). Do not expand automatically.
+
+### Sync vs automatic progress
+
+- Agents auto-read the latest 2 progress files on session start (via rule files).
+- Sync is the **manual, full handover** view: handoffs + tiered progress + alerts.
+- Sync is user-triggered; the agent should not run Sync on every session start.
