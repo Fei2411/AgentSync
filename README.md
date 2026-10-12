@@ -10,17 +10,17 @@
 
 **macOS / Linux / WSL：**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash
 ```
 
 **Windows PowerShell：**
 ```powershell
-irm https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.ps1 | iex
+irm https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.ps1 | iex
 ```
 
 只安装到指定 Agent：
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash -s -- --agents grok,claude
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash -s -- --agents grok,claude
 ```
 
 安装后在任意项目中输入 `/agentsync` 即可使用。
@@ -30,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync
 更新命令与安装相同，会覆盖本地 `SKILL.md` 到最新版：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash
 ```
 
 或在 Agent 里直接说：
@@ -41,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync
 
 查看本地版本 vs 远程版本：
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash -s -- --check
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash -s -- --check
 ```
 
 ## 功能

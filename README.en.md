@@ -10,17 +10,17 @@ One command installs to every detected agent host (Claude Code, Grok Build, Curs
 
 **macOS / Linux / WSL:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash
 ```
 
 **Windows PowerShell:**
 ```powershell
-irm https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.ps1 | iex
+irm https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.ps1 | iex
 ```
 
 Install to specific agents only:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash -s -- --agents grok,claude
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash -s -- --agents grok,claude
 ```
 
 Then invoke `/agentsync` in any project.
@@ -30,7 +30,7 @@ Then invoke `/agentsync` in any project.
 The update command is the same as install — it overwrites the local `SKILL.md` with the latest release:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash
 ```
 
 Or inside your agent:
@@ -40,7 +40,7 @@ Or inside your agent:
 
 Check installed vs latest version:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash -s -- --check
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash -s -- --check
 ```
 
 ## Features

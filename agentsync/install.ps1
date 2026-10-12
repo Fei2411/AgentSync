@@ -1,6 +1,6 @@
 # AgentSync skill installer / updater (Windows PowerShell)
 # Usage:
-#   irm https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.ps1 | iex
 #   irm .../install.ps1 | iex; Install-AgentSync -Agents grok,claude -Check
 
 param(
@@ -9,7 +9,7 @@ param(
     [string]$Branch = "main"
 )
 
-$Repo = "FeiZhuLulu/AgentSync"
+$Repo = "Fei2411/AgentSync"
 $SkillUrl = "https://raw.githubusercontent.com/$Repo/$Branch/agentsync/SKILL.md"
 
 function Get-SkillDir([string]$Agent) {
