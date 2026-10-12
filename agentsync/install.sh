@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # AgentSync skill installer / updater
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash
 #   curl -fsSL .../install.sh | bash -s -- --agents grok,claude
 #   curl -fsSL .../install.sh | bash -s -- --check
 
 set -euo pipefail
 
-REPO="FeiZhuLulu/AgentSync"
+REPO="Fei2411/AgentSync"
 BRANCH="main"
 SKILL_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/agentsync/SKILL.md"
 AGENTS=""
@@ -27,7 +27,7 @@ Options:
   -h, --help      Show this help
 
 Examples:
-  curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash
   curl -fsSL .../install.sh | bash -s -- --agents grok,claude,cursor
   curl -fsSL .../install.sh | bash -s -- --check
 EOF

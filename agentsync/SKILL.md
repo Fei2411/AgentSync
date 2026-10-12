@@ -82,12 +82,12 @@ If the user says **update agentsync**, **更新 agentsync**, or passes `update` 
 
 **macOS / Linux / WSL:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.sh | bash
 ```
 
 **Windows PowerShell:**
 ```powershell
-irm https://raw.githubusercontent.com/FeiZhuLulu/AgentSync/main/agentsync/install.ps1 | iex
+irm https://raw.githubusercontent.com/Fei2411/AgentSync/main/agentsync/install.ps1 | iex
 ```
 
 To update only specific agents, append flags:
